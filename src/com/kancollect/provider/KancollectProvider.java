@@ -25,6 +25,7 @@ import android.util.Log;
 public class KancollectProvider extends ContentProvider {
 
     public static final String DATABASE_NAME = "kancollect.db";
+    public static final String DATABASE_FOLDER = "databases";
     public static final int DATABASE_VERSION = 1;
     private DatabaseHelper mOpenHelper;
 
@@ -50,6 +51,22 @@ public class KancollectProvider extends ContentProvider {
         public DatabaseHelper(Context context) {
             super(context, DATABASE_NAME, null, DATABASE_VERSION);
             setWriteAheadLoggingEnabled(true);
+            checkDabasExsits();
+        }
+
+        @Override
+        public SQLiteDatabase getReadableDatabase() {
+            checkDabasExsits();
+            return super.getReadableDatabase();
+        }
+
+        @Override
+        public SQLiteDatabase getWritableDatabase() {
+            checkDabasExsits();
+            return super.getWritableDatabase();
+        }
+
+        private void checkDabasExsits(){
             File dbFile = getContext().getDatabasePath(DATABASE_NAME);
             if (!dbFile.exists()){
                 try {
@@ -59,6 +76,7 @@ public class KancollectProvider extends ContentProvider {
                 }
             }
         }
+
         @Override
         public void onCreate(SQLiteDatabase db) {
 
@@ -92,11 +110,11 @@ public class KancollectProvider extends ContentProvider {
         if (!parFile.exists()){
             parFile.mkdirs();
         }
-        String[] files = getContext().getAssets().list("database");
+        String[] files = getContext().getAssets().list(DATABASE_FOLDER);
         InputStream inputStream;
         OutputStream out = new FileOutputStream(file);
         for (int i = 0; i < files.length; i++) {
-            inputStream = getContext().getAssets().open("database/" + files[i]);
+            inputStream = getContext().getAssets().open(DATABASE_FOLDER + File.separator + files[i]);
             byte[] buffer = new byte[1024];
             while(inputStream.read(buffer)>0){
                 out.write(buffer);
